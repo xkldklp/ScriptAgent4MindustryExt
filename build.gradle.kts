@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "1.9.21"
     id("me.qoomon.git-versioning") version "2.1.1"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
@@ -22,10 +22,6 @@ if (projectDir.resolve(".git").isDirectory)
     })
 
 sourceSets {
-    main {
-        java.srcDir("scripts")
-        java.exclude("cache")
-    }
     create("plugin") {
         java.srcDir("plugin/src")
         resources.srcDir("plugin/res")
@@ -59,8 +55,37 @@ repositories {
     }
 }
 
+//@Suppress("MemberVisibilityCanBePrivate", "CanBeParameter")
+class Module(val name: String) {
+    val id = if (name == "main") "mainModule" else name
+    fun module(name: String) = Module(name)
+    val api = configurations.maybeCreate("${id}Api")
+    val implementation = configurations.maybeCreate("${id}Implementation")
+
+    operator fun Configuration.invoke(module: Module) {
+        extendsFrom(module.api)
+        dependencies {
+            this@invoke(sourceSets.getByName(module.id).output)
+        }
+    }
+}
+
+fun defineModule(
+    name: String,
+    srcDir: String = "scripts/$name",
+    body: Module.() -> Unit,
+) = Module(name).apply {
+    sourceSets.create(id) {
+        kotlin.srcDir(srcDir)
+    }
+    dependencies {
+        api.extendsFrom(configurations.getByName("api"))
+    }
+    body()
+}
+
 dependencies {
-    val libraryVersion = "1.10.5.6"
+    val libraryVersion = "1.10.6"
     val mindustryVersion = "cf96f4730e" //v146.001
     val pluginImplementation by configurations
     pluginImplementation("cf.wayzer:ScriptAgent:$libraryVersion")
@@ -68,41 +93,55 @@ dependencies {
 //    pluginImplementation("com.github.Anuken.Mindustry:core:$mindustryVersion")
     pluginImplementation("com.github.TinyLake.MindustryX_tmp:core:$mindustryVersion")
 
-    implementation(sourceSets.getByName("plugin").output)
-    implementation(kotlin("script-runtime"))
-    implementation("cf.wayzer:ScriptAgent:$libraryVersion")
+    api(sourceSets.getByName("plugin").output)
+    api(kotlin("script-runtime"))
+    api("cf.wayzer:ScriptAgent:$libraryVersion")
     kotlinScriptDef("cf.wayzer:ScriptAgent:$libraryVersion")
 
-    //coreLibrary
-    implementation("cf.wayzer:PlaceHoldLib:6.0")
-    implementation("io.github.config4k:config4k:0.4.1")
-    //coreLib/DBApi
-    val exposedVersion = "0.40.1"
-    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-    //coreLib/extApi/redisApi
-    implementation("redis.clients:jedis:4.3.1")
-    //coreLib/extApi/mongoApi
-    implementation("org.litote.kmongo:kmongo-coroutine:4.8.0")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    defineModule("bootStrap") {}
+    defineModule("coreLibrary") {
+        api("cf.wayzer:PlaceHoldLib:6.0")
+        api("io.github.config4k:config4k:0.4.1")
+        //coreLib/DBApi
+        val exposedVersion = "0.40.1"
+        api("org.jetbrains.exposed:exposed-core:$exposedVersion")
+        api("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+        api("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
+        //coreLib/extApi/redisApi
+        api("redis.clients:jedis:4.3.1")
+        //coreLib/extApi/mongoApi
+        api("org.litote.kmongo:kmongo-coroutine:4.8.0")
+        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    }
 
-    //coreMindustry
+    defineModule("coreMindustry") {
+        api(module("coreLibrary"))
 //    implementation("com.github.Anuken.Mindustry:core:$mindustryVersion")
-    implementation("com.github.TinyLake.MindustryX_tmp:core:$mindustryVersion")
-    //coreMindustry/console
-    implementation("org.jline:jline-terminal:3.21.0")
-    implementation("org.jline:jline-reader:3.21.0")
-    //coreMindustry/contentsTweaker
-    implementation("cf.wayzer:ContentsTweaker:v3.0.1")
+        api("com.github.TinyLake.MindustryX_tmp:core:$mindustryVersion")
+        //coreMindustry/console
+        implementation("org.jline:jline-terminal:3.21.0")
+        implementation("org.jline:jline-reader:3.21.0")
+        //coreMindustry/contentsTweaker
+        api("cf.wayzer:ContentsTweaker:v3.0.1")
+    }
+    defineModule("main") {
+        api(module("coreMindustry"))
+    }
 
-    //mirai
-    implementation("net.mamoe:mirai-core:2.15.0")
-    implementation("net.mamoe:mirai-core-utils:2.15.0")
-    implementation("top.mrxiaom:qsign:1.1.0-beta")
+    defineModule("mirai") {
+        api(module("coreLibrary"))
+        api("net.mamoe:mirai-core:2.15.0")
+        implementation("net.mamoe:mirai-core-utils:2.15.0")
+        implementation("top.mrxiaom:qsign:1.1.0-beta")
+    }
 
-    //wayzer
-    implementation("com.google.guava:guava:30.1-jre")
+    defineModule("wayzer") {
+        api(module("coreMindustry"))
+        api("com.google.guava:guava:30.1-jre")
+    }
+    defineModule("mapScript") {
+        api(module("wayzer"))
+    }
 }
 
 kotlin {
