@@ -148,6 +148,9 @@ kotlin {
     jvmToolchain(8)
 }
 tasks {
+    withType<JavaCompile>().configureEach {
+        enabled = false
+    }
     withType<KotlinCompile>().configureEach {
         kotlinOptions.jvmTarget = "1.8"
         kotlinOptions.freeCompilerArgs = listOf(

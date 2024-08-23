@@ -3,6 +3,7 @@ package bootStrap
 suspend fun boot() = ScriptManager.transaction {
     //add 添加需要加载的脚本(前缀判断) exclude 排除脚本(可以作为依赖被加载)
     addAll()
+    exclude("bootStrap/")
     exclude("coreLibrary/extApi/")//lazy load
     exclude("main/scratch")
     exclude("mirai")//Deprecated
