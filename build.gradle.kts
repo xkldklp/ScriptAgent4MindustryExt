@@ -171,9 +171,14 @@ tasks {
     }
     create<Zip>("scriptsZip") {
         group = "plugin"
-        from(sourceSets.main.get().allSource) {
-            exclude("cache")
-            exclude(".metadata")
+        from("scripts") {
+            include("bootStrap/**")
+            include("coreLibrary/**")
+            include("coreMindustry/**")
+            include("main/**")
+            include("wayzer/**")
+            include("mapScript/**")
+            include("mirai/**")
         }
         archiveClassifier.set("scripts")
         doLast {
