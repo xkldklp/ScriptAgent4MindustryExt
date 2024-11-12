@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.21"
+    kotlin("jvm") version "2.0.21"
     id("me.qoomon.git-versioning") version "2.1.1"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
@@ -31,9 +31,6 @@ sourceSets {
 repositories {
     val inChina = System.getProperty("user.timezone") in arrayOf("Asia/Shanghai", "GMT+08:00")
 //    mavenLocal()
-    if (inChina)
-        maven(url = "https://maven.aliyun.com/repository/public")//mirror for central
-
     mavenCentral()
     maven(url = "https://www.jitpack.io") {
         content {
@@ -85,7 +82,7 @@ fun defineModule(
 }
 
 dependencies {
-    val libraryVersion = "1.10.6.2"
+    val libraryVersion = "1.10.6.3"
     val mindustryVersion = "ca40f700fb" //v146.004
     val pluginImplementation by configurations
     pluginImplementation("cf.wayzer:ScriptAgent:$libraryVersion")
@@ -145,19 +142,20 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(17)
 }
 tasks {
     withType<JavaCompile>().configureEach {
         enabled = false
     }
     withType<KotlinCompile>().configureEach {
-        kotlinOptions.jvmTarget = "1.8"
-        kotlinOptions.freeCompilerArgs = listOf(
-            "-Xinline-classes",
-            "-opt-in=kotlin.RequiresOptIn",
-            "-Xnullability-annotations=@arc.util:strict"
-        )
+        compilerOptions {
+            freeCompilerArgs = listOf(
+                "-Xinline-classes",
+                "-opt-in=kotlin.RequiresOptIn",
+                "-Xnullability-annotations=@arc.util:strict"
+            )
+        }
     }
     withType<ProcessResources> {
         inputs.property("version", loaderVersion)
