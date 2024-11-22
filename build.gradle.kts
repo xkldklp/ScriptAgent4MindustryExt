@@ -82,7 +82,7 @@ fun defineModule(
 }
 
 dependencies {
-    val libraryVersion = "1.10.6.3"
+    val libraryVersion = "1.10.6.4"
     val mindustryVersion = "ca40f700fb" //v146.004
     val pluginImplementation by configurations
     pluginImplementation("cf.wayzer:ScriptAgent:$libraryVersion")
