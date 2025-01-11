@@ -40,7 +40,7 @@ repositories {
 
     //ScriptAgent
     if (!inChina) {
-        maven("https://maven.tinylake.tech/") //cloudFlare mirror
+        maven("https://maven.tinylake.top/") //cloudFlare mirror
     } else {
         maven {
             url = uri("https://packages.aliyun.com/maven/repository/2102713-release-0NVzQH/")
@@ -167,7 +167,7 @@ tasks {
     named<Delete>("clean") {
         delete(files("scripts/cache"))
     }
-    create<Zip>("scriptsZip") {
+    register<Zip>("scriptsZip") {
         group = "plugin"
         from("scripts") {
             include("bootStrap/**")
@@ -183,7 +183,7 @@ tasks {
             println(archiveFile.get())
         }
     }
-    val buildPlugin = create<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("buildPlugin") {
+    val buildPlugin by registering(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
         group = "plugin"
         dependsOn("scriptsZip")
         from(sourceSets.getByName("plugin").output)
@@ -203,10 +203,10 @@ tasks {
     }
     val destPrecompile = layout.buildDirectory.dir("tmp/scripts")
     val destBuiltin = layout.buildDirectory.dir("tmp/builtinScripts")
-    val precompile = create<JavaExec>("precompile") {
+    val precompile = register<JavaExec>("precompile") {
         dependsOn(buildPlugin)
         group = "plugin"
-        classpath(buildPlugin.outputs.files)
+        classpath(buildPlugin.map { it.outputs.files })
         systemProperties["ScriptAgent.PreparePack"] = "true"
         environment("SAMain", "bootStrap/generate")
 
@@ -217,7 +217,7 @@ tasks {
             destBuiltin.get().asFile.deleteRecursively()
         }
     }
-    val precompileZip = create<Zip>("precompileZip") {
+    val precompileZip = register<Zip>("precompileZip") {
         dependsOn(precompile)
         group = "plugin"
         archiveClassifier.set("precompile")
@@ -228,13 +228,13 @@ tasks {
         }
     }
 
-    create<Jar>("allInOneJar") {
+    register<Jar>("allInOneJar") {
         dependsOn(buildPlugin, precompileZip)
         group = "plugin"
         archiveClassifier.set("allInOne")
         includeEmptyDirs = false
 
-        from(zipTree(buildPlugin.outputs.files.singleFile))
+        from(buildPlugin.map { zipTree(it.outputs.files.singleFile) })
         from(destBuiltin) {
             into("builtin")
         }
