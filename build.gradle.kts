@@ -108,6 +108,8 @@ dependencies {
         //coreLib/extApi/mongoApi
         api("org.litote.kmongo:kmongo-coroutine:4.8.0")
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+        //coreLib/extApi/KVStore
+        api("com.h2database:h2-mvstore:2.3.232")
     }
 
     defineModule("coreMindustry") {
