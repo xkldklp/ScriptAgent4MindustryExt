@@ -25,9 +25,9 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: |
             libs
@@ -42,7 +42,7 @@ jobs:
         run: ./gradlew buildPlugin
       
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: ScriptAgent-beta-${{github.run_num}}.jar
           path: build/libs
