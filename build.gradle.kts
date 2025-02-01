@@ -97,7 +97,8 @@ dependencies {
     defineModule("bootStrap") {}
     defineModule("coreLibrary") {
         api("cf.wayzer:PlaceHoldLib:6.0")
-        api("io.github.config4k:config4k:0.4.1")
+        api("io.github.config4k:config4k:0.7.0")
+        api("org.slf4j:slf4j-api:2.0.16")
         //coreLib/DBApi
         val exposedVersion = "0.40.1"
         api("org.jetbrains.exposed:exposed-core:$exposedVersion")
