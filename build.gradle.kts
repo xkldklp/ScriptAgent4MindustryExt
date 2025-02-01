@@ -99,6 +99,8 @@ dependencies {
         api("cf.wayzer:PlaceHoldLib:6.0")
         api("io.github.config4k:config4k:0.7.0")
         api("org.slf4j:slf4j-api:2.0.16")
+        //coreLib/kcp/serialization
+        api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
         //coreLib/DBApi
         val exposedVersion = "0.40.1"
         api("org.jetbrains.exposed:exposed-core:$exposedVersion")
