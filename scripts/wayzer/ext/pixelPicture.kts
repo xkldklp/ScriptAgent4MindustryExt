@@ -1,7 +1,6 @@
-package main
+package wayzer.ext
 
 import arc.graphics.Color
-import mindustry.content.Blocks
 import mindustry.game.Team
 import mindustry.type.Item
 import java.awt.Image
@@ -54,7 +53,7 @@ fun BufferedImage.resize(maxSize: Int): BufferedImage {
     return scaled
 }
 
-command("pixel", "绘制像素画") {
+command("pixel", "绘制像素画".with()) {
     usage = "[size=32] <url>"
     type = CommandType.Client
     permission = id.replace("/", ".")

@@ -1,6 +1,5 @@
-package main
+package wayzer.ext
 //WayZer 版权所有(请勿删除版权注解)
-import mindustry.gen.Call
 
 name = "跨服传送"
 
