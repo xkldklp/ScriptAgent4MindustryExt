@@ -1,6 +1,6 @@
 package bootStrap
 
-import cf.wayzer.scriptAgent.util.CASScriptPack
+import cf.wayzer.scriptAgent.util.CASScriptPacker
 import cf.wayzer.scriptAgent.util.DependencyManager
 import cf.wayzer.scriptAgent.util.maven.Dependency
 import java.io.File
@@ -11,7 +11,8 @@ fun prepareBuiltin(outputFile: File = File("build/tmp/builtin.zip")) {
     val scripts = ScriptRegistry.allScripts { it.scriptState.loaded }
         .mapNotNull { it.compiledScript }
     println("prepare Builtin for ${scripts.size} scripts.")
-    CASScriptPack.Packer(outputFile.outputStream())
+    @OptIn(SAExperimentalApi::class)
+    CASScriptPacker(outputFile.outputStream())
         .use { scripts.forEach(it::add) }
 }
 
