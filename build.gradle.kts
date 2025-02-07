@@ -124,13 +124,6 @@ dependencies {
         api(module("coreLibrary"))
     }
 
-    defineModule("mirai") {
-        api(module("coreLibrary"))
-        api("net.mamoe:mirai-core:2.15.0")
-        implementation("net.mamoe:mirai-core-utils:2.15.0")
-        implementation("top.mrxiaom:qsign:1.1.0-beta")
-    }
-
     defineModule("wayzer") {
         api(module("coreMindustry"))
         api("com.google.guava:guava:30.1-jre")
@@ -172,10 +165,8 @@ tasks {
             include("bootStrap/**")
             include("coreLibrary/**")
             include("coreMindustry/**")
-            include("main/**")
             include("wayzer/**")
             include("mapScript/**")
-            include("mirai/**")
         }
         archiveClassifier.set("scripts")
         doLast {
