@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.0.21"
+    kotlin("jvm") version "2.1.10"
     id("me.qoomon.git-versioning") version "2.1.1"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
@@ -53,8 +53,7 @@ repositories {
 }
 
 //@Suppress("MemberVisibilityCanBePrivate", "CanBeParameter")
-class Module(val name: String) {
-    val id = if (name == "main") "mainModule" else name
+class Module(val id: String) {
     fun module(name: String) = Module(name)
     val api = configurations.maybeCreate("${id}Api")
     val implementation = configurations.maybeCreate("${id}Implementation")
@@ -82,7 +81,7 @@ fun defineModule(
 }
 
 dependencies {
-    val libraryVersion = "1.10.6.5"
+    val libraryVersion = "1.11.1.3"
     val mindustryVersion = "ca40f700fb" //v146.004
     val pluginImplementation by configurations
     pluginImplementation("cf.wayzer:ScriptAgent:$libraryVersion")
@@ -121,8 +120,8 @@ dependencies {
         //coreMindustry/contentsTweaker
         api("cf.wayzer:ContentsTweaker:v3.0.1")
     }
-    defineModule("main") {
-        api(module("coreMindustry"))
+    defineModule("scratch") {
+        api(module("coreLibrary"))
     }
 
     defineModule("mirai") {

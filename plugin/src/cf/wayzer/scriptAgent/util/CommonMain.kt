@@ -1,11 +1,12 @@
 package cf.wayzer.scriptAgent.util
 
 import cf.wayzer.scriptAgent.*
+import cf.wayzer.scriptAgent.define.SAExperimentalApi
 import kotlinx.coroutines.runBlocking
 
 interface CommonMain {
     private suspend fun doStart(): Boolean {
-        val mainScript = ScriptRegistry.findScriptInfo(Config.mainScript) ?: return false
+        val mainScript = ScriptRegistry.getScriptInfo(Config.mainScript) ?: return false
         ScriptManager.transaction {
             add(mainScript)
             load();enable()
@@ -15,6 +16,8 @@ interface CommonMain {
 
     fun bootstrap() {
         MainScriptsHelper.load()
+        @OptIn(SAExperimentalApi::class)
+        ScriptRegistry.registries.add(CASPackScriptRegistry)
         ScriptRegistry.registries.add(BuiltinScriptRegistry)
         ScriptRegistry.scanRoot()
         val foundMain = runBlocking { doStart() }

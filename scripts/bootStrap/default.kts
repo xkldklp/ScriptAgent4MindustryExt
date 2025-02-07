@@ -5,7 +5,7 @@ suspend fun boot() = ScriptManager.transaction {
     addAll()
     exclude("bootStrap/")
     exclude("coreLibrary/extApi/")//lazy load
-    exclude("main/scratch")
+    exclude("scratch")
     exclude("mirai")//Deprecated
 
 

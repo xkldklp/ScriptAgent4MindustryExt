@@ -2,6 +2,7 @@ package cf.wayzer.scriptAgent.util
 
 import cf.wayzer.scriptAgent.Config
 import java.io.File
+import java.net.URL
 
 /** Contents Addressed Store*/
 object CAStore {
@@ -14,5 +15,15 @@ object CAStore {
             loader(file)
         }
         return file
+    }
+
+    fun getOrLoad(md5: String, url: URL): File {
+        return getOrLoad(md5) { f ->
+            url.openStream().use { inS ->
+                f.outputStream().use { out ->
+                    inS.copyTo(out)
+                }
+            }
+        }
     }
 }

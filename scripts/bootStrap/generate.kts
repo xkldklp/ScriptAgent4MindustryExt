@@ -1,41 +1,19 @@
 package bootStrap
 
+import cf.wayzer.scriptAgent.util.CASScriptPacker
 import cf.wayzer.scriptAgent.util.DependencyManager
 import cf.wayzer.scriptAgent.util.maven.Dependency
 import java.io.File
-import java.math.BigInteger
-import java.security.MessageDigest
 import kotlin.system.exitProcess
 import kotlin.system.measureTimeMillis
 
-fun prepareBuiltin(outputDir: File = File("build/tmp/builtinScripts")) {
-    val toSave = ScriptRegistry.allScripts { it.scriptState.loaded }
+fun prepareBuiltin(outputFile: File = File("build/tmp/builtin.zip")) {
+    val scripts = ScriptRegistry.allScripts { it.scriptState.loaded }
         .mapNotNull { it.compiledScript }
-        .sortedBy { it.id }
-    println("prepare Builtin for ${toSave.size} scripts.")
-
-    val md5Digest = MessageDigest.getInstance("MD5")
-    val destCAS = outputDir.resolve("by_md5").also(File::mkdirs)
-    fun addCAS(bs: ByteArray): String {
-        val md5 = BigInteger(1, md5Digest.digest(bs)).toString(16)
-        destCAS.resolve(md5).writeBytes(bs)
-        return md5
-    }
-
-    val meta = mutableListOf<String>()
-    toSave.forEach { script ->
-        val idWithModule = script.source.run { if (isModule) id + Config.moduleIdSuffix else id }
-        val scriptMD5 = addCAS(script.compiledFile.readBytes())
-
-        val resources = script.source.listResources()
-            .map { it.name to addCAS(it.loadFile().readBytes()) }
-            .sortedBy { it.first }
-            .joinToString(";") { "${it.first}:${it.second}" }
-        meta.add("$idWithModule $scriptMD5 $resources")
-    }
-    outputDir.resolve("META").bufferedWriter().use {
-        meta.joinTo(it, "\n")
-    }
+    println("prepare Builtin for ${scripts.size} scripts.")
+    @OptIn(SAExperimentalApi::class)
+    CASScriptPacker(outputFile.outputStream())
+        .use { scripts.forEach(it::add) }
 }
 
 fun prepareScripts(outputDir: File = File("build/tmp/scripts")) {
@@ -60,10 +38,14 @@ onEnable {
         return@onEnable ScriptManager.disableScript(this, "仅可通过SAMAIN启用")
     DependencyManager {
         addRepository("https://www.jitpack.io/")
-        requireWithChildren(Dependency.parse("com.github.TinyLake.MindustryX_tmp:core:v145.103"))
-        loadToClassLoader(ScriptAgent::class.java.classLoader)
+        require(Dependency.parse("com.github.TinyLake.MindustryX_tmp:core:v145.103"))
+        loadToClassLoader(Config.mainClassloader)
     }
     ScriptManager.transaction {
+        //compiler plugin
+        add("coreLibrary/kcp")
+        load();enable()
+
         if (Config.args.isEmpty())
             addAll()
         else
