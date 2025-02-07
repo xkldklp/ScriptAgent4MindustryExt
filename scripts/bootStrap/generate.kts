@@ -7,30 +7,13 @@ import java.io.File
 import kotlin.system.exitProcess
 import kotlin.system.measureTimeMillis
 
-fun prepareBuiltin(outputFile: File = File("build/tmp/builtin.zip")) {
+fun prepareBuiltin(outputFile: File = File("build/tmp/builtin.packed.zip")) {
     val scripts = ScriptRegistry.allScripts { it.scriptState.loaded }
         .mapNotNull { it.compiledScript }
     println("prepare Builtin for ${scripts.size} scripts.")
     @OptIn(SAExperimentalApi::class)
     CASScriptPacker(outputFile.outputStream())
         .use { scripts.forEach(it::add) }
-}
-
-fun prepareScripts(outputDir: File = File("build/tmp/scripts")) {
-    val toSave = ScriptRegistry.allScripts { it.scriptState.loaded }
-        .mapNotNull { it.compiledScript }
-        .sortedBy { it.id }
-    println("prepare scripts for ${toSave.size} scripts.")
-
-    toSave.forEach { script ->
-        val ktcFile = script.compiledFile
-        ktcFile.copyTo(outputDir.resolve(ktcFile.relativeTo(Config.cacheDir)).also { it.parentFile.mkdirs() })
-
-        script.source.listResources().forEach { res ->
-            val file = res.loadFile()
-            file.copyTo(outputDir.resolve(file.relativeTo(Config.rootDir)).also { it.parentFile.mkdirs() })
-        }
-    }
 }
 
 onEnable {
@@ -58,8 +41,7 @@ onEnable {
         println("\t${it.id}: ${it.failReason}")
     }
     if (System.getProperty("ScriptAgent.PreparePack") != null) {
-        println("Finish prepareScripts in ${measureTimeMillis { prepareScripts() }}ms")
-        println("Finish prepareBuiltin in ${measureTimeMillis { prepareBuiltin() }}ms")
+        println("Finish pack in ${measureTimeMillis { prepareBuiltin() }}ms")
     }
     exitProcess(fail.size)
 }

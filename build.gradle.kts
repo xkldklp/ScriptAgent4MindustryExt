@@ -196,8 +196,7 @@ tasks {
             println(archiveFile.get())
         }
     }
-    val destPrecompile = layout.buildDirectory.dir("tmp/scripts")
-    val destBuiltin = layout.buildDirectory.dir("tmp/builtinScripts")
+    val destPacked = layout.buildDirectory.file("tmp/builtin.packed.zip")
     val precompile = register<JavaExec>("precompile") {
         dependsOn(buildPlugin)
         group = "plugin"
@@ -206,18 +205,14 @@ tasks {
         environment("SAMain", "bootStrap/generate")
 
         inputs.files(sourceSets.main.get().allSource)
-        outputs.dirs(destPrecompile, destBuiltin)
-        doFirst {
-            destPrecompile.get().asFile.deleteRecursively()
-            destBuiltin.get().asFile.deleteRecursively()
-        }
+        outputs.file(destPacked)
     }
     val precompileZip = register<Zip>("precompileZip") {
         dependsOn(precompile)
         group = "plugin"
-        archiveClassifier.set("precompile")
+        archiveClassifier.set("precompile.packed")
 
-        from(destPrecompile)
+        from(zipTree(destPacked))
         doLast {
             println(archiveFile.get())
         }
@@ -230,7 +225,7 @@ tasks {
         includeEmptyDirs = false
 
         from(buildPlugin.map { zipTree(it.outputs.files.singleFile) })
-        from(destBuiltin) {
+        from(zipTree(destPacked)) {
             into("builtin")
         }
     }
